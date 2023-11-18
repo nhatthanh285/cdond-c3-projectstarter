@@ -316,6 +316,53 @@ jobs:
       - revert-migrations
       - destroy-environment 
 
+  deploy-backend:
+    docker:
+      # Docker image here that supports Ansible
+      - image: cimg/python:3.7-node
+    steps:
+      # Checkout code from git
+      - checkout       
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["48:f5:19:32:7e:b8:0f:43:c3:63:53:c9:5c:1a:17:95"]
+      # attach workspace
+      - attach_workspace:
+          at: ~/
+
+      - run:
+          name: Install aws dependencies
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+      - run:
+          name: Install Ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
+      - run:
+          name: Deploy backend
+          command: |
+            # your code here
+            cd backend # echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            npm i
+            npm run build
+            cd ..
+            # Zip the directory
+            tar -C backend -czvf artifact.tar.gz .
+            mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
+            mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml -v
+      # Here's where you will add some code to rollback on failure  
+      - revert-migrations
+      - destroy-environment  
+
 workflows:
   default:
     jobs:
@@ -337,3 +384,5 @@ workflows:
            requires: [configure-infrastructure]
       - deploy-frontend:
            requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
