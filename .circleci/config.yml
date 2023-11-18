@@ -284,6 +284,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            yum install -y tar gzip
             yum install https://rpm.nodesource.com/pub_16.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm -y
             yum install nodejs -y --setopt=nodesource-nodejs.module_hotfixes=1            
 
