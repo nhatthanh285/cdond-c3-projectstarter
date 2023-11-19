@@ -17,9 +17,11 @@
 - name: "Start backend application with PM2"
   shell: |
     cd ~/backend-app/
-    pm2 stop default
+    echo $TYPEORM_ENTITIES
+    npm install
+    pm2 stop all
     pm2 delete default
-    pm2 start npm -- start
+    pm2 start npm -- run "start:dev"
   register: execute_node
 
 - name: print message
