@@ -402,7 +402,7 @@ jobs:
             fi
 
    
-      - destroy-environment  
+      # - destroy-environment  
       - revert-migrations
 
 workflows:
