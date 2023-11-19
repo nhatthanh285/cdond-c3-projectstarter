@@ -15,13 +15,11 @@
     npm i
 
 - name: "Start backend application with PM2"
-  become: yes
   shell: |
     cd ~/backend-app/
-    npm install
     pm2 stop default
     pm2 delete default
-    pm2 start npm --name "udapeople-backend" -- run "start:dev"ß
+    pm2 start npm -- start
   register: execute_node
 
 - name: print message
