@@ -1,0 +1,5 @@
+Git repo: URL 01 - https://github.com/nhatthanh285/cdond-c3-projectstarter
+S3 Bucket: URL 02 - http://udapeople-35a7a35.s3-website-us-east-1.amazonaws.com/#/employees
+Distribution: URL 03 - d4icvpqbiaorv.cloudfront.net
+Back-end Status: URL 04 - http://ec2-54-227-116-6.compute-1.amazonaws.com:3030/api/status
+Prometheus: URL 05 - http://ec2-52-90-122-104.compute-1.amazonaws.com:9090/targets

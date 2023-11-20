@@ -31,9 +31,8 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-              SUCCESS=$(curl --insecure  https://kvdb.io/${KVDB_BUCKET_ID}/migration_<< parameters.Workflow_ID >>)
-              # Logic for reverting the database state
-              if (( $SUCCESS == 1 ));
+              SUCCESS=$(curl --insecure  https://kvdb.io/${KVDB_BUCKET_ID}/migration_${CIRCLE_WORKFLOW_ID:0:7})
+              if (( $SUCCESS == 1 ))
               then
                 cd ~/project/backend
                 npm install
@@ -396,7 +395,7 @@ jobs:
             if curl -s ${URL} | grep "Welcome"
             then
                 # Change this to 0 after the job fails
-              exit 0
+              exit 1
             else
               exit 1
             fi
@@ -443,27 +442,42 @@ jobs:
       - revert-migrations
 
   cleanup:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
-      - run:
-          name: Get old stack workflow id and Cleanup
-          command: |           
-            export OldWorkflowID=$(curl --insecure https://kvdb.io/${KVDB_BUCKET_ID}/old_workflow_id)
-            export STACKS=($(aws --region us-west-2 cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
-            echo OldWorkflowID: "${OldWorkflowID}"
-            echo CIRCLE_WORKFLOW_ID "$CIRCLE_WORKFLOW_ID"
-            echo Stack names: "${STACKS[@]}"
-            if [[ ${STACKS[@]} =~ "${OldWorkflowID}" ]]
-            then
-              aws --region us-west-2 s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
-              aws --region us-west-2 cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-              aws --region us-west-2 cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
-              echo "Deleted"
-            else
-              echo "Cannot delete"            
-            fi
+      docker:
+        # Docker image with AWS CLI support
+        - image: amazon/aws-cli
+      steps:
+        # check out from git
+        - checkout
+        - run:
+            name: Install dependencies
+            command: |
+              yum install tar gzip -y
+        # attach workspace '..oldworkflowID.txt data'
+        - attach_workspace:
+            at: ~/
+        - run:
+            name: Fetch OldStack workflow ID
+            command: |
+              export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
+              --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
+              echo Stack names: "${STACKS[@]}"
+              cat ~/project/OldWorkflowID.txt
+              export OldWorkflowID=$(cat ~/project/OldWorkflowID.txt)
+              echo OldWorkflowID: "${OldWorkflowID}"
+        - run:
+            name: Cleanup OldStacks
+            command: |
+              export OldWorkflowID=$(cat ~/project/OldWorkflowID.txt)
+              if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
+              then
+                echo "----------Deleted------------"
+                echo "udapeople-${OldWorkflowID}"
+                aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive || true
+                aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}" || true
+                aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}" || true
+              else
+                echo  "---------Cannot cleanup--------------"
+              fi
 
 workflows:
   default:
