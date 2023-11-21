@@ -35,7 +35,8 @@ commands:
               if (($SUCCESS == 1))
               then
                 echo "Go to backend folder and run migration"
-                cd ~/project/backend
+                ls ~/
+                cd ~/cdond-c3-projectstarter/backend
                 npm install
                 npm run migration:revert
               fi
@@ -398,7 +399,7 @@ jobs:
             if curl -s ${URL} | grep "Welcome"
             then
                 # Change this to 0 after the job fails
-              cat ~/project/backend/migrations_dump.txt
+              cat ~/cdond-c3-projectstarter/backend/migrations_dump.txt
               exit 1
             else
               exit 1
