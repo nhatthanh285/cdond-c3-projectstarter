@@ -36,7 +36,7 @@ commands:
               then
                 echo "Go to backend folder and run migration"
                 ls ~/project
-                cd ~/cdond-c3-projectstarter/backend
+                cd /home/circleci/project/backend
                 npm install
                 npm run migration:revert
               fi
@@ -52,7 +52,6 @@ jobs:
       - run:
           name: Build front-end
           command: |
-            ls ~/project
             cd frontend
             npm install
             npm run build
@@ -400,7 +399,7 @@ jobs:
             if curl -s ${URL} | grep "Welcome"
             then
                 # Change this to 0 after the job fails
-              cat ~/cdond-c3-projectstarter/backend/migrations_dump.txt
+              cat /home/circleci/project/backend/migrations_dump.txt
               exit 1
             else
               exit 1
