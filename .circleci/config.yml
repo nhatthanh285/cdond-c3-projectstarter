@@ -447,8 +447,8 @@ jobs:
       - persist_to_workspace:
             root: ~/
             paths:
-              - project/OldWorkflowID.txt
-              
+              - project/OldWorkflow_ID.txt
+
       # Here's where you will add some code to rollback on failure
       - destroy-environment
       - revert-migrations
@@ -464,7 +464,7 @@ jobs:
             name: Install dependencies
             command: |
               yum install tar gzip -y
-        # attach workspace '..oldworkflowID.txt data'
+        # attach workspace '..OldWorkflow_ID.txt data'
         - attach_workspace:
             at: ~/
         - run:
@@ -473,13 +473,13 @@ jobs:
               export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
               echo Stack names: "${STACKS[@]}"
-              cat ~/project/OldWorkflowID.txt
-              export OldWorkflowID=$(cat ~/project/OldWorkflowID.txt)
+              cat ~/project/OldWorkflow_ID.txt
+              export OldWorkflowID=$(cat ~/project/OldWorkflow_ID.txt)
               echo OldWorkflowID: "${OldWorkflowID}"
         - run:
             name: Cleanup OldStacks
             command: |
-              export OldWorkflowID=$(cat ~/project/OldWorkflowID.txt)
+              export OldWorkflowID=$(cat ~/project/OldWorkflow_ID.txt)
               if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
               then
                 echo "----------Deleted------------"
