@@ -34,7 +34,8 @@ commands:
               SUCCESS=$(curl --insecure  https://kvdb.io/YZKd95Rae9Yo3ZHLReUMSq/migration_${CIRCLE_WORKFLOW_ID:0:7})
               if (($SUCCESS == 1))
               then
-                cd backend
+                echo "Go to backend folder and run migration"
+                cd ~/project/backend
                 npm install
                 npm run migration:revert
               fi
@@ -397,6 +398,7 @@ jobs:
             if curl -s ${URL} | grep "Welcome"
             then
                 # Change this to 0 after the job fails
+              cat ~/project/backend/migrations_dump.txt
               exit 1
             else
               exit 1
