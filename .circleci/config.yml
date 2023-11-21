@@ -35,7 +35,7 @@ commands:
               if (($SUCCESS == 1))
               then
                 echo "Go to backend folder and run migration"
-                ls ~/
+                ls ~/project
                 cd ~/cdond-c3-projectstarter/backend
                 npm install
                 npm run migration:revert
@@ -52,6 +52,7 @@ jobs:
       - run:
           name: Build front-end
           command: |
+            ls ~/project
             cd frontend
             npm install
             npm run build
